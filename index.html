@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stripe - Financial infrastructure to grow your revenue</title>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #0a2540;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Navigation */
+        .navbar {
+            background: transparent;
+            padding: 1rem 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            transition: background 0.3s ease;
+        }
+
+        .navbar.scrolled {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .navbar.scrolled .logo {
+            color: #0a2540;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-links a {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .navbar.scrolled .nav-links a {
+            color: #6b7280;
+        }
+
+        .nav-links a:hover {
+            color: white;
+        }
+
+        .navbar.scrolled .nav-links a:hover {
+            color: #0a2540;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .navbar.scrolled .btn-secondary {
+            color: #0a2540;
+            border-color: #e5e7eb;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .navbar.scrolled .btn-secondary:hover {
+            background: #f9fafb;
+            color: #0a2540;
+        }
+
+        .btn-primary {
+            background: #0a2540;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1a365d;
+            transform: translateY(-2px);
+        }
+
+        .mobile-menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .navbar.scrolled .mobile-menu-toggle {
+            color: #0a2540;
+        }
+
+        .mobile-menu-toggle:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .navbar.scrolled .mobile-menu-toggle:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ce53ff 25%, #ffd93d 50%, #ffffff 75%, #ffffff 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.1) 0%, rgba(255, 142, 83, 0.1) 25%, rgba(255, 217, 61, 0.1) 50%, rgba(107, 207, 127, 0.1) 75%, rgba(77, 157, 224, 0.1) 100%);
+            pointer-events: none;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+        }
+
+        .sessions-banner {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(139, 69, 19, 0.9);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .sessions-banner:hover {
+            background: rgba(139, 69, 19, 1);
+            transform: translateY(-2px);
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            line-height: 1.1;
+            background: linear-gradient(135deg, #1a202c 0%, #2d3748 25%, #e53e3e 50%, #dd6b20 75%, #0a2540 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: #2d3748;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            line-height: 1.6;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-large {
+            padding: 1rem 2rem;
+            font-size: 1rem;
+        }
+
+        .btn-dark {
+            background: #0a2540;
+            color: white;
+        }
+
+        .btn-dark:hover {
+            background: #1a365d;
+            transform: translateY(-2px);
+        }
+
+        .btn-text {
+            color: #2d3748;
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: color 0.3s ease;
+        }
+
+        .btn-text:hover {
+            color: #0a2540;
+        }
+
+        /* Client Logos */
+        .clients {
+            background: white;
+            padding: 3rem 0;
+            text-align: center;
+        }
+
+        .clients h3 {
+            font-size: 1.125rem;
+            color: #6b7280;
+            margin-bottom: 2rem;
+            font-weight: 500;
+        }
+
+        .client-logos {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .client-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0a2540;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+
+        .client-logo:hover {
+            opacity: 1;
+        }
+
+        .amazon-logo {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .amazon-text {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #0a2540;
+        }
+
+        .amazon-swoosh {
+            width: 60px;
+            height: 4px;
+            background: #ff9900;
+            border-radius: 2px;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 5rem 0;
+            background: #f8fafc;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-header h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #0a2540;
+        }
+
+        .section-header p {
+            font-size: 1.125rem;
+            color: #6b7280;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #635bff, #a855f7);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            color: white;
+        }
+
+        .feature-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #0a2540;
+        }
+
+        .feature-card p {
+            color: #6b7280;
+            line-height: 1.6;
+        }
+
+        /* Cookie Banner */
+        .cookie-banner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            padding: 1rem;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .cookie-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .cookie-text {
+            color: #6b7280;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        .cookie-text a {
+            color: #635bff;
+            text-decoration: none;
+        }
+
+        .cookie-text a:hover {
+            text-decoration: underline;
+        }
+
+        .cookie-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(10px);
+                flex-direction: column;
+                padding: 1rem 0;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+                border-top: 1px solid rgba(255, 255, 255, 0.2);
+            }
+
+            .nav-links.active {
+                display: flex;
+            }
+
+            .nav-links li {
+                margin: 0;
+            }
+
+            .nav-links a {
+                display: block;
+                padding: 0.75rem 2rem;
+                color: #0a2540;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            }
+
+            .nav-links a:last-child {
+                border-bottom: none;
+            }
+
+            .nav-links a:hover {
+                background: rgba(0, 0, 0, 0.05);
+                color: #0a2540;
+            }
+
+            .mobile-menu-toggle {
+                display: block;
+            }
+
+            .nav-buttons {
+                gap: 0.5rem;
+            }
+
+            .btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.8rem;
+            }
+
+            .hero h1 {
+                font-size: 4rem;
+                line-height: 1.1;
+                margin-bottom: 1.5rem;
+            }
+
+            .hero p {
+                font-size: 1.2rem;
+                line-height: 1.5;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .section-header h2 {
+                font-size: 2rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .client-logos {
+                gap: 2rem;
+            }
+
+            .cookie-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .cookie-buttons {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 15px;
+            }
+
+            .hero {
+                padding: 2rem 0;
+                min-height: 90vh;
+            }
+
+            .hero h1 {
+                font-size: 3rem;
+                line-height: 1.2;
+                margin-bottom: 1.5rem;
+                word-wrap: break-word;
+            }
+
+            .hero p {
+                font-size: 1.1rem;
+                line-height: 1.6;
+                margin-bottom: 1.5rem;
+            }
+
+            .sessions-banner {
+                font-size: 0.8rem;
+                padding: 8px 16px;
+                margin-bottom: 1.5rem;
+            }
+
+            .hero-buttons {
+                gap: 0.75rem;
+            }
+
+            .btn-large {
+                padding: 0.875rem 1.5rem;
+                font-size: 0.95rem;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .hero h1 {
+                font-size: 2.5rem;
+                line-height: 1.3;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .sessions-banner {
+                font-size: 0.75rem;
+                padding: 6px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <a href="#" class="logo">stripe</a>
+                
+                <ul class="nav-links">
+                    <li><a href="#products">Products</a></li>
+                    <li><a href="#solutions">Solutions</a></li>
+                    <li><a href="#developers">Developers</a></li>
+                    <li><a href="#pricing">Pricing</a></li>
+                    <li><a href="#resources">Resources</a></li>
+                </ul>
+
+                <div class="nav-buttons">
+                    <a href="login.html" class="btn btn-secondary">Sign in</a>
+                    <a href="#" class="btn btn-primary">Start now</a>
+                    <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                        <i data-lucide="menu"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <a href="#" class="sessions-banner">
+                    <span>Sessions 2025</span>
+                    <i data-lucide="play"></i>
+                    <span>Watch on demand</span>
+                    <i data-lucide="arrow-right"></i>
+                </a>
+
+                <h1>Financial infrastructure to grow your revenue</h1>
+                <p>Join the millions of companies that use Stripe to accept payments online and in person, embed financial services, power custom revenue models, and build a more profitable business.</p>
+                
+                <div class="hero-buttons">
+                    <a href="#" class="btn btn-dark btn-large">
+                        Start now
+                        <i data-lucide="arrow-right"></i>
+                    </a>
+                    <a href="#" class="btn-text">
+                        Contact sales
+                        <i data-lucide="arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Client Logos -->
+    <section class="clients">
+        <div class="container">
+            <h3>Trusted by leading companies worldwide</h3>
+            <div class="client-logos">
+                <div class="client-logo">OpenAI</div>
+                <div class="amazon-logo">
+                    <div class="amazon-text">amazon</div>
+                    <div class="amazon-swoosh"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="container">
+            <div class="section-header">
+                <h2>Why businesses choose Stripe</h2>
+                <p>Built for developers, loved by businesses. Accept payments and scale faster.</p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i data-lucide="credit-card"></i>
+                    </div>
+                    <h3>Payments</h3>
+                    <p>Accept payments and move money globally with the world's most flexible and scalable payment infrastructure.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i data-lucide="shield"></i>
+                    </div>
+                    <h3>Security</h3>
+                    <p>Built-in fraud prevention and compliance tools help protect your business and customers.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i data-lucide="zap"></i>
+                    </div>
+                    <h3>Fast Integration</h3>
+                    <p>Get started in minutes with our simple APIs and comprehensive documentation.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i data-lucide="globe"></i>
+                    </div>
+                    <h3>Global Reach</h3>
+                    <p>Accept payments in 135+ currencies and scale your business worldwide.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Cookie Banner -->
+    <div class="cookie-banner" id="cookieBanner">
+        <div class="container">
+            <div class="cookie-content">
+                <div class="cookie-text">
+                    We use cookies to improve your experience and for marketing. 
+                    <a href="#">Read our cookie policy</a> or 
+                    <a href="#">manage cookies</a>.
+                </div>
+                <div class="cookie-buttons">
+                    <button class="btn btn-primary btn-small" onclick="acceptCookies()">Accept all</button>
+                    <button class="btn btn-secondary btn-small" onclick="rejectCookies()">Reject all</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Mobile menu toggle
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const navLinks = document.querySelector('.nav-links');
+
+        mobileMenuToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+        });
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!mobileMenuToggle.contains(e.target) && !navLinks.contains(e.target)) {
+                navLinks.classList.remove('active');
+            }
+        });
+
+        // Close mobile menu when clicking on a link
+        navLinks.addEventListener('click', (e) => {
+            if (e.target.tagName === 'A') {
+                navLinks.classList.remove('active');
+            }
+        });
+
+        // Navbar scroll effect
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 100) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Cookie banner functions
+        function acceptCookies() {
+            document.getElementById('cookieBanner').style.display = 'none';
+            // In a real app, you would set a cookie here
+        }
+
+        function rejectCookies() {
+            document.getElementById('cookieBanner').style.display = 'none';
+            // In a real app, you would handle cookie rejection here
+        }
+
+        // Auto-hide cookie banner after 5 seconds (for demo purposes)
+        setTimeout(() => {
+            const cookieBanner = document.getElementById('cookieBanner');
+            if (cookieBanner) {
+                cookieBanner.style.opacity = '0';
+                setTimeout(() => {
+                    cookieBanner.style.display = 'none';
+                }, 300);
+            }
+        }, 5000);
+    </script>
+</body>
+</html> 
